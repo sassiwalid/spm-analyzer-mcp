@@ -12,3 +12,4 @@ startCommand:
       args: ['spm-analyzer-mcp']
     })
   exampleConfig: {}
+  runtime: typescript
