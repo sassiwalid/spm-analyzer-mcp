@@ -1,0 +1,23 @@
+version: "1.0"
+
+server:
+  name: spm-analyzer-mcp
+  description: Analyze Swift Package Manager files and extract dependencies, products, and targets
+  
+runtime:
+  type: npm
+  package: spm-analyzer-mcp
+  
+repository:
+  type: github
+  url: https://github.com/sassiwalid/spm-analyzer-mcp
+
+tags:
+  - swift
+  - spm
+  - package-manager
+  - dependencies
+  - ios
+  - macos
+
+license: MIT
