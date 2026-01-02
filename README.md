@@ -122,7 +122,7 @@ MIT
 
 ## Author
 
-[Your Name]
+Walid SASSI
 
 ## Contributing
 
