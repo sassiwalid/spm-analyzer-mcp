@@ -1,6 +1,6 @@
 {
   "name": "spm-analyzer-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for analyzing Swift Package Manager files",
   "bin": {
     "spm-analyzer-mcp": "bin/spm-analyzer-mcp.js"
@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sassiwalid/spm-analyzer-mcp.git"
+    "url": "https://github.com/sassiwalid/spm-analyzer-mcp.git"
   },
   "keywords": [
     "mcp",
