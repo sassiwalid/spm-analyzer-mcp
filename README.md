@@ -1,92 +1,135 @@
 # SPM Analyzer MCP Server
 
-A Model Context Protocol (MCP) server that analyzes Swift Package Manager (SPM) package files, providing tools to parse and extract information about dependencies, products, and targets from `Package.swift` files.
-
-## Features
-
-- **parse-package**: Parse a `Package.swift` file and extract structured information including:
-  - Package dependencies
-  - Products (executables, libraries)
-  - Build targets
-  - Package metadata
-
-## Requirements
-
-- macOS 13.0 or later
-- Swift 6.2 or later
+🔍 An MCP server for analyzing Swift Package Manager files and automatically extracting dependencies, products, and targets.
 
 ## Installation
 
-### Building from Source
-
+### Via Claude MCP (recommended)
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd spm-analyzer-mcp
-
-# Build the project
-swift build -c release
-
-# The executable will be available at:
-# .build/release/spm-analyzer-mcp
+claude mcp add spm-analyzer-mcp
 ```
 
-## Usage
+### Via npm
+```bash
+npm install -g spm-analyzer-mcp
+```
 
-This server implements the Model Context Protocol and can be used with any MCP-compatible client, such as Claude Desktop.
-
-### Configuration for Claude Desktop
-
-Add this server to your Claude Desktop configuration file:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
+Then configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
     "spm-analyzer": {
-      "command": "/path/to/spm-analyzer-mcp/.build/release/spm-analyzer-mcp"
+      "command": "spm-analyzer-mcp"
     }
   }
 }
 ```
 
-### Available Tools
+## Features
 
-#### parse-package
+### Tool: `parse-package`
 
-Parses a Swift Package.swift file and returns structured information about the package.
+Analyzes a `Package.swift` file and extracts:
+- ✅ Package name
+- ✅ Dependencies with their versions (from, upToNextMajor, branch, etc.)
+- ✅ Products (libraries, executables)
+- ✅ Targets (target, testTarget, executableTarget)
 
-**Parameters:**
-- `path` (required): Absolute path to the Package.swift file
-
-**Example:**
+**Example usage in Claude:**
 ```
-Use the parse-package tool to analyze /path/to/Package.swift
+Analyze the Package.swift file at /path/to/Package.swift
 ```
 
-The tool returns JSON-formatted data containing the package's dependencies, products, and targets.
+**Structured response:**
+```json
+{
+  "packageName": "MyPackage",
+  "dependencies": [
+    {
+      "name": "Alamofire",
+      "url": "https://github.com/Alamofire/Alamofire.git",
+      "requirement": "^5.8.0"
+    }
+  ],
+  "products": ["MyLibrary"],
+  "targets": ["MyLibrary", "MyLibraryTests"]
+}
+```
+
+## Use Cases
+
+- 📊 Audit dependencies in Swift projects
+- 🔄 Project migration
+- 📝 Automatic documentation
+- 🔍 Package structure analysis
 
 ## Development
 
-### Running Tests
+### Prerequisites
+- Swift 6.0+
+- macOS 13+
 
+### Building from source
+```bash
+# Clone
+git clone https://github.com/YOUR-USERNAME/spm-analyzer-mcp.git
+cd spm-analyzer-mcp
+
+# Build
+swift build -c release
+
+# Run tests
+swift test
+```
+
+## Configuration
+
+The server provides one tool that can be used through Claude Desktop or Claude Code:
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `parse-package` | Analyzes a Package.swift file | `path`: Path to the Package.swift file |
+
+## Example
+
+**User:** "Can you analyze the Package.swift in my project at /Users/john/MyProject/Package.swift?"
+
+**Claude (using spm-analyzer):** Returns structured information about:
+- Package name and version
+- All dependencies with their version requirements
+- Exported products
+- All targets in the package
+
+## Supported Version Formats
+
+The parser supports all Swift Package Manager version requirement formats:
+- `from: "1.0.0"` → `>=1.0.0`
+- `.upToNextMajor(from: "1.0.0")` → `^1.0.0`
+- `.upToNextMinor(from: "1.0.0")` → `~1.0.0`
+- `.exact("1.0.0")` → `==1.0.0`
+- `branch: "main"` → `branch:main`
+
+## Testing
+
+The project includes comprehensive tests using Swift Testing:
 ```bash
 swift test
 ```
 
-### Project Structure
-
-- `Sources/spm-analyzer-mcp/` - Main server implementation
-  - `spm_analyzer_mcp.swift` - Server entry point and MCP tool definitions
-  - `PackageParser.swift` - Package.swift parsing logic
-  - `PackageAnalysis.swift` - Analysis data structures
-  - `PackageDependency.swift` - Dependency models
-
-## About MCP
-
-The Model Context Protocol (MCP) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. Learn more at [modelcontextprotocol.io](https://modelcontextprotocol.io).
-
 ## License
 
-[Add your license information here]
+MIT
+
+## Author
+
+[Your Name]
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Related
+
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [Swift Package Manager](https://www.swift.org/package-manager/)
+- [Claude Desktop](https://claude.ai/download)
