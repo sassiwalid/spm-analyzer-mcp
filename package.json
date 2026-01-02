@@ -1,0 +1,26 @@
+{
+  "name": "spm-analyzer-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for analyzing Swift Package Manager files",
+  "bin": {
+    "spm-analyzer-mcp": "bin/spm-analyzer-mcp.js"
+  },
+  "scripts": {
+    "postinstall": "node bin/postinstall.js"
+  },
+  "files": [
+    "bin/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sassiwalid/spm-analyzer-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "swift",
+    "package-manager",
+    "spm"
+  ],
+  "author": "Walid SASSI",
+  "license": "MIT"
+}
