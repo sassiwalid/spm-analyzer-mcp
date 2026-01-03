@@ -1,9 +1,3 @@
-runtime: container
-
-build:
-  dockerfile: "Dockerfile"
-  dockerBuildPath: "."
-
 startCommand:
   type: stdio
   configSchema:
@@ -11,6 +5,7 @@ startCommand:
     properties: {}
   commandFunction: |-
     (config) => ({
-      command: 'spm-analyzer-mcp'
+      command: 'npx',
+      args: ['spm-analyzer-mcp']
     })
   exampleConfig: {}
