@@ -7,7 +7,7 @@
 
 import Testing
 
-@testable import spm_analyzer_mcp
+@testable import SPMAnalyzerMCP
 
 @Suite("PackageParserTests")
 struct PackageParserTests {
@@ -39,15 +39,15 @@ struct PackageParserTests {
     }
 
     @Test("Missing package name returns nil")
-        func missingPackageName() throws {
-            let content = """
+    func missingPackageName() throws {
+        let content = """
             let package = Package(
                 products: []
             )
             """
 
-            let result = try PackageParser.parse(content: content)
-            #expect(result.packageName == nil)
-        }
+        let result = try PackageParser.parse(content: content)
+        #expect(result.packageName == nil)
+    }
 }
 
