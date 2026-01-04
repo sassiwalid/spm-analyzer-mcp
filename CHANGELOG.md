@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Smithery Deployment Support** - Updated Docker configuration to use HTTP transport instead of stdio for hosted deployments
+  - Added `supergateway` bridge to convert stdio to HTTP/SSE transport
+  - Updated `smithery.yaml` to use `type: http` with port 8080
+  - Exposed port 8080 in Dockerfile for HTTP communication
+
+### Fixed
+- Resolved Smithery deployment error: "Container runtime cannot use stdio transport for hosted deployments"
+
 ## [0.2.0] - 2026-01-04
 
 ### Changed
