@@ -26,7 +26,7 @@ public struct SPMAnalyzerMCPServer {
 
         let server = Server(
             name: "spm-analyser-mcp-server",
-            version: "0.1.0",
+            version: "0.2.0",
             capabilities: .init(tools: .init())
         )
 
