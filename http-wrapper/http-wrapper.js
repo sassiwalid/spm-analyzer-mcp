@@ -30,7 +30,16 @@ app.use((req, res, next) => {
 
 // Spawn the Swift MCP server process
 console.log('Starting Swift MCP server...');
-const mcpServer = spawn('spm-analyzer-mcp', [], {
+const path = require('path');
+
+const mcpBinary = path.resolve(
+  __dirname,
+  '..',
+  'bin',
+  'spm-analyzer-mcp-binary'
+);
+
+const mcpServer = spawn(mcpBinary, [], {
   stdio: ['pipe', 'pipe', 'pipe']
 });
 
@@ -270,9 +279,10 @@ app.get('/.well-known/mcp-config', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`HTTP wrapper listening on http://0.0.0.0:${PORT}`);
-  console.log('MCP endpoints:');
-  console.log(`  POST http://0.0.0.0:${PORT}/mcp`);
-  console.log(`  GET  http://0.0.0.0:${PORT}/mcp`);
-  console.log(`  GET  http://0.0.0.0:${PORT}/health`);
-  console.log(`  GET  http://0.0.0.0:${PORT}/.well-known/mcp-config`);
+    console.log(`HTTP wrapper listening on http://0.0.0.0:${PORT}`);
+    console.log('MCP endpoints:');
+    console.log(`  POST http://0.0.0.0:${PORT}/mcp`);
+    console.log(`  GET  http://0.0.0.0:${PORT}/mcp`);
+    console.log(`  GET  http://0.0.0.0:${PORT}/health`);
+    console.log(`  GET  http://0.0.0.0:${PORT}/.well-known/mcp-config`);
+});
