@@ -144,6 +144,97 @@ When modifying the parser or MCP tool:
 3. Test with a real Package.swift file by sending JSON-RPC request to stdin
 4. For Docker changes: `docker build -t test-spm .` then test HTTP endpoints
 
+## Creating a Release
+
+When creating a new release version (e.g., v0.3.0):
+
+### 1. Update CHANGELOG.md
+
+Move content from `[Unreleased]` section to a new version section:
+
+```markdown
+## [Unreleased]
+
+## [0.x.0] - YYYY-MM-DD
+
+### Added
+- Feature descriptions...
+
+### Changed
+- Changes...
+
+### Fixed
+- Bug fixes...
+```
+
+### 2. Update Version in Code
+
+Update the version string in `Sources/SPMAnalyzerMCP/SPMAnalyzerMCPServer.swift`:
+
+```swift
+let server = Server(
+    name: "spm-analyser-mcp-server",
+    version: "0.x.0",  // Update this
+    capabilities: .init(tools: .init())
+)
+```
+
+Also update `package.json` if the version is tracked there.
+
+### 3. Commit and Tag
+
+```bash
+# Commit changelog
+git add CHANGELOG.md
+git commit -m "Release vX.X.X"
+
+# Create annotated tag
+git tag -a vX.X.X -m "vX.X.X - Release Title
+
+Brief description of major changes.
+See CHANGELOG.md for full details."
+
+# Push commit and tag
+git push && git push origin vX.X.X
+```
+
+### 4. Build and Upload Release Binary
+
+**IMPORTANT**: The npm package installation depends on downloading a prebuilt binary from GitHub releases.
+
+```bash
+# Build release binary
+swift build -c release
+
+# Create GitHub release with binary
+gh release create vX.X.X \
+  --title "vX.X.X - Release Title" \
+  --notes "Release notes from CHANGELOG..."
+
+# Upload the binary (must be named 'spm-analyzer-mcp')
+cp .build/release/SPMAnalyzerMCPServer /tmp/spm-analyzer-mcp
+gh release upload vX.X.X /tmp/spm-analyzer-mcp
+```
+
+The binary MUST be named `spm-analyzer-mcp` (not `SPMAnalyzerMCPServer`) because `bin/postinstall.js` downloads it from:
+```
+https://github.com/sassiwalid/spm-analyzer-mcp/releases/latest/download/spm-analyzer-mcp
+```
+
+### 5. Verify Release
+
+Check that the release is complete:
+
+```bash
+# View release details
+gh release view vX.X.X
+
+# Verify binary is downloadable
+curl -L https://github.com/sassiwalid/spm-analyzer-mcp/releases/download/vX.X.X/spm-analyzer-mcp --output test-binary
+chmod +x test-binary
+./test-binary --help  # Should run without errors
+```
+
 ## Dependencies
 
 - **Swift SDK**: `https://github.com/modelcontextprotocol/swift-sdk` (v0.10.2+)
