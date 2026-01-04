@@ -79,12 +79,23 @@ mcpServer.stdout.on('data', (data) => {
 });
 
 mcpServer.stderr.on('data', (data) => {
-  console.error('MCP Server Error:', data.toString());
+  const errorMsg = data.toString();
+  console.error('MCP Server stderr:', errorMsg);
+  // Don't exit on stderr, might just be logging
 });
 
 mcpServer.on('close', (code) => {
   console.error('MCP server process exited with code', code);
-  process.exit(code);
+  serverReady = false;
+  // Don't exit the wrapper immediately, let current requests finish
+  setTimeout(() => {
+    console.error('Exiting wrapper after server closed');
+    process.exit(code || 1);
+  }, 1000);
+});
+
+mcpServer.stdin.on('error', (err) => {
+  console.error('Error writing to MCP server stdin:', err);
 });
 
 // Helper to send request to MCP server
@@ -102,21 +113,39 @@ function sendToMcpServer(method, params = {}) {
 
     // Set up response handler
     responseHandlers.set(id, (response) => {
+      console.log('Received response for ID:', id);
       if (response.error) {
+        console.error('MCP Error response:', response.error);
         reject(new Error(response.error.message || 'MCP Error'));
       } else {
+        console.log('MCP Success response:', JSON.stringify(response.result));
         resolve(response.result);
       }
     });
 
-    // Send request
-    mcpServer.stdin.write(JSON.stringify(request) + '\n');
+    // Send request - ensure it's flushed
+    try {
+      const written = mcpServer.stdin.write(JSON.stringify(request) + '\n');
+      if (!written) {
+        console.warn('Write to stdin buffer full, waiting for drain...');
+        mcpServer.stdin.once('drain', () => {
+          console.log('Stdin drained, request sent');
+        });
+      } else {
+        console.log('Request written to stdin successfully');
+      }
+    } catch (err) {
+      console.error('Error writing to stdin:', err);
+      responseHandlers.delete(id);
+      reject(err);
+    }
 
     // Timeout after 30 seconds
     setTimeout(() => {
       if (responseHandlers.has(id)) {
+        console.error('Request timeout for ID:', id, 'method:', method);
         responseHandlers.delete(id);
-        reject(new Error('Request timeout'));
+        reject(new Error(`Request timeout for ${method}`));
       }
     }, 30000);
   });
@@ -209,10 +238,26 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  GET  http://0.0.0.0:${PORT}/health`);
   console.log(`  GET  http://0.0.0.0:${PORT}/.well-known/mcp-config`);
 
-  // Give server a moment to start, then test it
-  setTimeout(() => {
+  // Give server a moment to start, then test it with an initialize request
+  setTimeout(async () => {
     if (!serverReady) {
       console.warn('WARNING: Swift MCP server did not spawn within 2 seconds');
+      return;
+    }
+
+    console.log('Testing MCP server with initialize request...');
+    try {
+      const result = await sendToMcpServer('initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: {
+          name: 'http-wrapper-test',
+          version: '1.0.0'
+        }
+      });
+      console.log('✓ MCP server responded to initialize:', JSON.stringify(result));
+    } catch (err) {
+      console.error('✗ MCP server failed to respond to initialize:', err.message);
     }
   }, 2000);
 });
