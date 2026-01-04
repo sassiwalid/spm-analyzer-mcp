@@ -14,7 +14,9 @@ struct mcp_server {
     static func main() async throws {
 
         // Configure logging to use stderr to avoid corrupting stdout JSON-RPC stream
-        LoggingSystem.bootstrap(StreamLogHandler.standardError)
+        LoggingSystem.bootstrap { label in
+            StreamLogHandler.standardError(label: label)
+        }
 
         let logger = Logger(label: "com.sassi.spmAnalyzerMCPServer")
 
