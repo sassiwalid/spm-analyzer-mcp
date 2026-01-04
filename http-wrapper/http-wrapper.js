@@ -32,14 +32,9 @@ app.use((req, res, next) => {
 console.log('Starting Swift MCP server...');
 const path = require('path');
 
-const mcpBinary = path.resolve(
-  __dirname,
-  '..',
-  'bin',
-  'spm-analyzer-mcp-binary'
-);
+const MCP_BINARY = '/usr/local/bin/spm-analyzer-mcp';
 
-const mcpServer = spawn(mcpBinary, [], {
+const mcpServer = spawn(MCP_BINARY, [], {
   stdio: ['pipe', 'pipe', 'pipe']
 });
 

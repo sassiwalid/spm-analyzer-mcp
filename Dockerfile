@@ -48,8 +48,8 @@ RUN ls -lh /usr/local/bin/spm-analyzer-mcp && \
     ldd /usr/local/bin/spm-analyzer-mcp || echo "Note: ldd check completed"
 
 # Copy HTTP wrapper files
-COPY http-wrapper.js ./
-COPY wrapper-package.json ./package.json
+COPY http-wrapper/http-wrapper.js ./http-wrapper.js
+COPY http-wrapper/package.json ./package.json
 
 # Install Node.js dependencies for the wrapper
 RUN npm install --production
