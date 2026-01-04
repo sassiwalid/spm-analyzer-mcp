@@ -1,29 +1,23 @@
-FROM python:3.11-slim
+FROM swift:6.0-jammy AS builder
 
 WORKDIR /app
 
-# Install Node.js (needed for spm-analyzer-mcp binary installation)
-RUN apt-get update && apt-get install -y \
-    curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the entire project
+COPY . .
 
-# Install the spm-analyzer-mcp server via npm
-RUN npm install -g spm-analyzer-mcp
+# Build the Swift MCP server in release mode
+RUN swift build -c release
 
-# Install Python dependencies for the HTTP wrapper
-RUN pip install --no-cache-dir flask flask-cors
+# Create a final runtime image with Swift runtime
+FROM swift:6.0-jammy-slim
 
-# Clone and setup mcp-wrapper-http
-RUN curl -o /app/http_wrapper.py https://raw.githubusercontent.com/DougBourban/mcp-wrapper-http/main/http_wrapper.py
+WORKDIR /app
 
-# Expose port for HTTP transport
-EXPOSE 8080
+# Copy the built binary from the builder stage
+COPY --from=builder /app/.build/release/SPMAnalyzerMCPServer /usr/local/bin/spm-analyzer-mcp
 
-# Use environment variable for port (Smithery sets this)
-ENV PORT=8080
+# Make it executable
+RUN chmod +x /usr/local/bin/spm-analyzer-mcp
 
-# Wrap the stdio MCP server with HTTP endpoints at /mcp
-CMD ["python3", "/app/http_wrapper.py", "--host", "0.0.0.0", "--port", "8080", "spm-analyzer-mcp"]
+# The binary uses stdio transport
+CMD ["spm-analyzer-mcp"]

@@ -8,17 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Smithery Deployment Support** - Updated Docker configuration to use HTTP transport with proper MCP endpoints
-  - Added `mcp-wrapper-http` bridge to convert stdio to HTTP with `/mcp` endpoint
-  - Switched base image to Python 3.11 for wrapper compatibility
-  - Added Node.js installation for npm binary distribution
-  - Updated `smithery.yaml` to use `type: http` with port 8080
-  - Exposed port 8080 in Dockerfile for HTTP communication
+- **Smithery Deployment Support** - Updated Docker configuration to build Swift binary directly in container
+  - Implemented multi-stage Docker build using swift:6.0-jammy for compilation
+  - Final stage uses minimal ubuntu:22.04 runtime with compiled binary
+  - Reverted to stdio transport (native to Swift MCP server)
+  - Removed external wrapper dependencies for simpler, more reliable deployment
 
 ### Fixed
-- Resolved Smithery deployment error: "Container runtime cannot use stdio transport for hosted deployments"
-- Fixed missing `/mcp` endpoint for Streamable HTTP protocol compliance
-- Resolved authentication scan failures by implementing proper HTTP endpoint structure
+- Resolved Smithery container deployment issues by building Swift binary natively
+- Eliminated npm binary download dependencies in container
+- Simplified deployment architecture for better reliability
 
 ## [0.2.0] - 2026-01-04
 
