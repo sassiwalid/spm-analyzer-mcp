@@ -1,0 +1,16 @@
+# Git files
+.git
+.gitignore
+
+# Build artifacts
+.build
+bin
+
+# macOS
+.DS_Store
+
+# Node modules (these will be installed in the container)
+node_modules
+
+# Documentation
+README.md

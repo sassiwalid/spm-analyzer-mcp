@@ -2,9 +2,8 @@ FROM swift:6.0-jammy AS builder
 
 WORKDIR /app
 
-# Copy the Swift project
-COPY Package.swift Package.resolved ./
-COPY Sources ./Sources
+# Copy the entire Swift project (excluding files in .dockerignore)
+COPY . .
 
 # Build the Swift MCP server in release mode
 RUN swift build -c release
