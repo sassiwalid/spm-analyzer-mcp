@@ -5,12 +5,9 @@ build:
   dockerBuildPath: "."
 
 startCommand:
-  type: stdio
+  type: http
+  port: 8080
   configSchema:
     type: object
     properties: {}
-  commandFunction: |-
-    (config) => ({
-      command: 'spm-analyzer-mcp'
-    })
   exampleConfig: {}

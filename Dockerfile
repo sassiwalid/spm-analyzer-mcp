@@ -2,22 +2,45 @@ FROM swift:6.0-jammy AS builder
 
 WORKDIR /app
 
-# Copy the entire project
-COPY . .
+# Copy the Swift project
+COPY Package.swift Package.resolved ./
+COPY Sources ./Sources
 
 # Build the Swift MCP server in release mode
 RUN swift build -c release
 
-# Create a final runtime image with Swift runtime
-FROM swift:6.0-jammy-slim
+# Create a final runtime image with Node.js and Swift runtime
+FROM ubuntu:22.04
 
 WORKDIR /app
 
-# Copy the built binary from the builder stage
-COPY --from=builder /app/.build/release/SPMAnalyzerMCPServer /usr/local/bin/spm-analyzer-mcp
+# Install Node.js and Swift runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    libcurl4 \
+    libxml2 \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Make it executable
+# Copy the built Swift binary
+COPY --from=builder /app/.build/release/SPMAnalyzerMCPServer /usr/local/bin/spm-analyzer-mcp
 RUN chmod +x /usr/local/bin/spm-analyzer-mcp
 
-# The binary uses stdio transport
-CMD ["spm-analyzer-mcp"]
+# Copy HTTP wrapper files
+COPY http-wrapper.js ./
+COPY wrapper-package.json ./package.json
+
+# Install Node.js dependencies for the wrapper
+RUN npm install --production
+
+# Expose HTTP port
+EXPOSE 8080
+
+# Set environment variable for port
+ENV PORT=8080
+
+# Start the HTTP wrapper (which spawns the Swift MCP server)
+CMD ["node", "http-wrapper.js"]

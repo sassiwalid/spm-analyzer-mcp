@@ -7,17 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Custom HTTP Wrapper** - Created Node.js-based HTTP wrapper for Smithery deployment
+  - Implements POST /mcp and GET /mcp endpoints for MCP protocol
+  - Adds GET /.well-known/mcp-config for configuration discovery
+  - Includes GET /health endpoint for health checks
+  - Spawns Swift MCP server as child process and bridges stdio to HTTP
+
 ### Changed
-- **Smithery Deployment Support** - Updated Docker configuration to build Swift binary directly in container
-  - Implemented multi-stage Docker build using swift:6.0-jammy for compilation
-  - Final stage uses minimal ubuntu:22.04 runtime with compiled binary
-  - Reverted to stdio transport (native to Swift MCP server)
-  - Removed external wrapper dependencies for simpler, more reliable deployment
+- **Smithery Deployment Support** - Multi-stage Docker build with custom HTTP bridge
+  - Build stage: Compiles Swift binary from source using swift:6.0-jammy
+  - Runtime stage: Ubuntu 22.04 with Node.js 20 and Swift runtime dependencies
+  - HTTP wrapper bridges stdio MCP server to HTTP endpoints
+  - Updated smithery.yaml to use HTTP transport on port 8080
 
 ### Fixed
-- Resolved Smithery container deployment issues by building Swift binary natively
-- Eliminated npm binary download dependencies in container
-- Simplified deployment architecture for better reliability
+- Resolved Smithery container runtime requirement for HTTP transport
+- Fixed MCP endpoint structure for proper Streamable HTTP protocol support
 
 ## [0.2.0] - 2026-01-04
 

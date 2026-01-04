@@ -1,0 +1,10 @@
+{
+  "name": "spm-analyzer-mcp-http-wrapper",
+  "version": "1.0.0",
+  "description": "HTTP wrapper for SPM Analyzer MCP Server",
+  "main": "http-wrapper.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2"
+  }
+}
