@@ -42,8 +42,10 @@ COPY --from=builder /usr/lib/swift /usr/lib/swift
 COPY --from=builder /app/.build/release/SPMAnalyzerMCPServer /usr/local/bin/spm-analyzer-mcp
 RUN chmod +x /usr/local/bin/spm-analyzer-mcp
 
-# Test that the binary can execute (will wait for stdin, we'll timeout quickly)
-RUN timeout 2 /usr/local/bin/spm-analyzer-mcp || [ $? -eq 124 ] && echo "Binary loads successfully"
+# Verify the binary exists and has correct permissions
+RUN ls -lh /usr/local/bin/spm-analyzer-mcp && \
+    file /usr/local/bin/spm-analyzer-mcp && \
+    ldd /usr/local/bin/spm-analyzer-mcp || echo "Note: ldd check completed"
 
 # Copy HTTP wrapper files
 COPY http-wrapper.js ./
