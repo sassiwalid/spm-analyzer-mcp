@@ -226,8 +226,9 @@ app.post('/mcp', async (req, res) => {
   }
 });
 
-// MCP Server Card (required by Smithery)
-app.get('/.well-known/mcp-server-card', (req, res) => {
+// MCP Server Card (.json variant required by Smithery)
+app.get('/.well-known/mcp-server-card.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
   res.json({
     name: 'spm-analyzer-mcp',
     description: 'MCP server for analyzing Swift Package Manager projects',
