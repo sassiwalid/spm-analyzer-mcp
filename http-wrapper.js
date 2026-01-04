@@ -36,7 +36,7 @@ const mcpServer = spawn('spm-analyzer-mcp', [], {
 
 let responseHandlers = new Map();
 let messageId = 0;
-let sessionId = null;
+let sessionId = require('crypto').randomUUID(); // Generate session ID for this wrapper instance
 let serverReady = false;
 
 // Buffer for incomplete JSON messages
@@ -175,11 +175,9 @@ app.post('/mcp', async (req, res) => {
     // Forward to MCP server
     const result = await sendToMcpServer(method, params);
 
-    // Store session ID from initialize response
-    if (method === 'initialize' && result.sessionId) {
-      sessionId = result.sessionId;
-    }
-
+    // Send response with proper headers
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Mcp-Session-Id', sessionId);
     res.json({
       jsonrpc: '2.0',
       id: id,
@@ -187,6 +185,7 @@ app.post('/mcp', async (req, res) => {
     });
   } catch (error) {
     console.error('Error handling request:', error);
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({
       jsonrpc: '2.0',
       id: req.body.id || null,
@@ -217,6 +216,19 @@ app.get('/mcp', (req, res) => {
 // GET /health - Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', server: 'spm-analyzer-mcp' });
+});
+
+// GET /debug - Debug information (for troubleshooting without container logs)
+app.get('/debug', (req, res) => {
+  res.json({
+    serverReady: serverReady,
+    processRunning: !mcpServer.killed,
+    pid: mcpServer.pid,
+    sessionId: sessionId,
+    pendingRequests: responseHandlers.size,
+    bufferLength: buffer.length,
+    bufferPreview: buffer.substring(0, 200) // First 200 chars of buffer
+  });
 });
 
 // GET /.well-known/mcp-config - Configuration discovery

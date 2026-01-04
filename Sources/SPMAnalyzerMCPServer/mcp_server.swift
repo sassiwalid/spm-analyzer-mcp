@@ -13,6 +13,9 @@ import SPMAnalyzerMCP
 struct mcp_server {
     static func main() async throws {
 
+        // Configure logging to use stderr to avoid corrupting stdout JSON-RPC stream
+        LoggingSystem.bootstrap(StreamLogHandler.standardError)
+
         let logger = Logger(label: "com.sassi.spmAnalyzerMCPServer")
 
         let arguments = CommandLine.arguments
