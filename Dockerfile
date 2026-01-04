@@ -1,12 +1,15 @@
-FROM swift:6.0-jammy AS builder
+FROM swift:latest AS builder
 
 WORKDIR /app
 
 # Copy the entire Swift project (excluding files in .dockerignore)
 COPY . .
 
+# Resolve dependencies first
+RUN swift package resolve
+
 # Build the Swift MCP server in release mode
-RUN swift build -c release
+RUN swift build -c release --static-swift-stdlib
 
 # Create a final runtime image with Node.js and Swift runtime
 FROM ubuntu:22.04
