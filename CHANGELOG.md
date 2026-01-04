@@ -7,16 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-04
+
 ### Added
 - **Custom HTTP Wrapper** - Created Node.js-based HTTP wrapper for Smithery deployment
   - Implements POST /mcp and GET /mcp endpoints for MCP protocol
   - Adds GET /.well-known/mcp-config for configuration discovery
+  - Adds GET /.well-known/mcp-server-card.json for server metadata
   - Includes GET /health endpoint for health checks
+  - Includes GET /debug endpoint for troubleshooting
   - Spawns Swift MCP server as child process and bridges stdio to HTTP
+- **CLAUDE.md** - Comprehensive documentation file for Claude Code
+  - Architecture overview and multi-transport design
+  - Development commands and testing guidelines
+  - Key implementation details for MCP server and HTTP wrapper
 
 ### Changed
 - **Smithery Deployment Support** - Multi-stage Docker build with custom HTTP bridge
-  - Build stage: Compiles Swift binary from source using swift:6.0-jammy
+  - Build stage: Compiles Swift binary from source using swift:latest
   - Runtime stage: Ubuntu 22.04 with Node.js 20 and Swift runtime dependencies
   - HTTP wrapper bridges stdio MCP server to HTTP endpoints
   - Updated smithery.yaml to use HTTP transport on port 8080
@@ -24,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Resolved Smithery container runtime requirement for HTTP transport
 - Fixed MCP endpoint structure for proper Streamable HTTP protocol support
+- Fixed MCP initialization by redirecting Swift logs to stderr
+- Fixed CORS headers for Smithery authentication
 
 ## [0.2.0] - 2026-01-04
 
