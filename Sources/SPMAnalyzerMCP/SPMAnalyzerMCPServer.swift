@@ -48,7 +48,7 @@ public struct SPMAnalyzerMCPServer {
             }
         }
 
-        let transport = StdioTransport()
+        let transport = StdioTransport(logger: logger)
 
         try await server.start(transport: transport)
 
