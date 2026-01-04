@@ -20,7 +20,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Mcp-Protocol-Version, Mcp-Session-Id, Authorization');
   res.header('Access-Control-Expose-Headers', 'mcp-session-id, mcp-protocol-version');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
@@ -168,25 +168,50 @@ app.post('/mcp', async (req, res) => {
       });
     }
 
+    const protocolVersion =
+      req.header('mcp-protocol-version') ||
+      req.header('Mcp-Protocol-Version');
+
+      if (protocolVersion !== '2024-11-05') {
+          return res.status(400).json({
+              jsonrpc: '2.0',
+              id: req.body?.id ?? null,
+              error: {
+                  code: -32600,
+                  message: 'Unsupported MCP protocol version'
+              }
+          });
+      }
+
+      // Send response with proper headers
+    res.setHeader('mcp-protocol-version', '2024-11-05');
+    res.setHeader('Mcp-Session-Id', sessionId);
+
     const { method, params, id } = req.body;
 
     console.log('HTTP Request:', JSON.stringify(req.body));
 
+    if (method === 'initialize') {
+          const result = await sendToMcpServer(method, params);
+          return res.json({
+              jsonrpc: '2.0',
+              id,
+              result
+          });
+      }
+
     // Forward to MCP server
     const result = await sendToMcpServer(method, params);
 
-    // Send response with proper headers
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Mcp-Session-Id', sessionId);
-    res.json({
+    return res.json({
       jsonrpc: '2.0',
       id: id,
       result: result
     });
   } catch (error) {
     console.error('Error handling request:', error);
-    res.setHeader('Content-Type', 'application/json');
-    res.status(500).json({
+    res.setHeader('mcp-protocol-version', '2024-11-05');
+    return res.status(500).json({
       jsonrpc: '2.0',
       id: req.body.id || null,
       error: {
@@ -251,27 +276,3 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  GET  http://0.0.0.0:${PORT}/mcp`);
   console.log(`  GET  http://0.0.0.0:${PORT}/health`);
   console.log(`  GET  http://0.0.0.0:${PORT}/.well-known/mcp-config`);
-
-  // Give server a moment to start, then test it with an initialize request
-  setTimeout(async () => {
-    if (!serverReady) {
-      console.warn('WARNING: Swift MCP server did not spawn within 2 seconds');
-      return;
-    }
-
-    console.log('Testing MCP server with initialize request...');
-    try {
-      const result = await sendToMcpServer('initialize', {
-        protocolVersion: '2024-11-05',
-        capabilities: {},
-        clientInfo: {
-          name: 'http-wrapper-test',
-          version: '1.0.0'
-        }
-      });
-      console.log('✓ MCP server responded to initialize:', JSON.stringify(result));
-    } catch (err) {
-      console.error('✗ MCP server failed to respond to initialize:', err.message);
-    }
-  }, 2000);
-});
