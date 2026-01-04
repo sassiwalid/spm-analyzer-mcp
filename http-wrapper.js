@@ -27,6 +27,7 @@ app.use((req, res, next) => {
 });
 
 // Spawn the Swift MCP server process
+console.log('Starting Swift MCP server...');
 const mcpServer = spawn('spm-analyzer-mcp', [], {
   stdio: ['pipe', 'pipe', 'pipe']
 });
@@ -34,9 +35,21 @@ const mcpServer = spawn('spm-analyzer-mcp', [], {
 let responseHandlers = new Map();
 let messageId = 0;
 let sessionId = null;
+let serverReady = false;
 
 // Buffer for incomplete JSON messages
 let buffer = '';
+
+// Handle process start
+mcpServer.on('spawn', () => {
+  console.log('Swift MCP server process spawned successfully');
+  serverReady = true;
+});
+
+mcpServer.on('error', (err) => {
+  console.error('Failed to start Swift MCP server:', err);
+  process.exit(1);
+});
 
 // Handle stdout from the MCP server
 mcpServer.stdout.on('data', (data) => {
@@ -112,6 +125,18 @@ function sendToMcpServer(method, params = {}) {
 // POST /mcp - Main MCP endpoint
 app.post('/mcp', async (req, res) => {
   try {
+    if (!serverReady) {
+      console.error('Server not ready yet');
+      return res.status(503).json({
+        jsonrpc: '2.0',
+        id: req.body.id || null,
+        error: {
+          code: -32000,
+          message: 'Server not ready'
+        }
+      });
+    }
+
     const { method, params, id } = req.body;
 
     console.log('HTTP Request:', JSON.stringify(req.body));
@@ -183,4 +208,11 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  GET  http://0.0.0.0:${PORT}/mcp`);
   console.log(`  GET  http://0.0.0.0:${PORT}/health`);
   console.log(`  GET  http://0.0.0.0:${PORT}/.well-known/mcp-config`);
+
+  // Give server a moment to start, then test it
+  setTimeout(() => {
+    if (!serverReady) {
+      console.warn('WARNING: Swift MCP server did not spawn within 2 seconds');
+    }
+  }, 2000);
 });

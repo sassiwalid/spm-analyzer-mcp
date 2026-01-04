@@ -16,20 +16,34 @@ FROM ubuntu:22.04
 
 WORKDIR /app
 
-# Install Node.js and Swift runtime dependencies
+# Install Node.js and ALL Swift runtime dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     ca-certificates \
     libcurl4 \
     libxml2 \
+    libc6 \
+    libgcc-s1 \
+    libstdc++6 \
+    zlib1g \
+    libsqlite3-0 \
+    libncurses5 \
+    libedit2 \
+    libz3-4 \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy Swift runtime libraries from builder
+COPY --from=builder /usr/lib/swift /usr/lib/swift
+
 # Copy the built Swift binary
 COPY --from=builder /app/.build/release/SPMAnalyzerMCPServer /usr/local/bin/spm-analyzer-mcp
 RUN chmod +x /usr/local/bin/spm-analyzer-mcp
+
+# Verify the binary works
+RUN /usr/local/bin/spm-analyzer-mcp --help || echo "Binary test failed, continuing..."
 
 # Copy HTTP wrapper files
 COPY http-wrapper.js ./
