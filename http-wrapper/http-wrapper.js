@@ -160,7 +160,7 @@ function sendToMcpServer(method, params = {}) {
 // POST /mcp - Main MCP endpoint
 app.post('/mcp', async (req, res) => {
   try {
-    if (!serverReady) {
+    if (!serverReady && req.body?.method !== 'initialize') {
       console.error('Server not ready yet');
       return res.status(503).json({
         jsonrpc: '2.0',
