@@ -15,11 +15,13 @@ const PORT = process.env.PORT || 8080;
 // Parse JSON bodies
 app.use(bodyParser.json());
 
-// Enable CORS
+// Enable CORS with Smithery-required headers
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id, Authorization');
+  res.header('Access-Control-Expose-Headers', 'mcp-session-id, mcp-protocol-version');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
