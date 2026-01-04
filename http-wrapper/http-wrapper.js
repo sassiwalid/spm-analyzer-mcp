@@ -226,6 +226,21 @@ app.post('/mcp', async (req, res) => {
   }
 });
 
+// MCP Server Card (required by Smithery)
+app.get('/.well-known/mcp-server-card', (req, res) => {
+  res.json({
+    name: 'spm-analyzer-mcp',
+    description: 'MCP server for analyzing Swift Package Manager projects',
+    version: '1.0.0',
+    protocolVersion: '2024-11-05',
+    capabilities: {
+      tools: true,
+      resources: false,
+      prompts: false
+    }
+  });
+});
+
 // GET /mcp - SSE endpoint (for streaming)
 app.get('/mcp', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
